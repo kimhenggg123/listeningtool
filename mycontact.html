@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Work Contacts</title>
+  <style>
+    :root {
+      --primary: #0d1b2a;
+      --background-light: #ffffff;
+      --background-dark: #000000;
+      --text-light: #000000;
+      --text-dark: #ffffff;
+      --button-bg: #1b263b;
+      --button-hover: #415a77;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--background-light);
+      color: var(--text-light);
+      transition: all 0.3s ease;
+    }
+
+    .dark-mode {
+      background-color: var(--background-dark);
+      color: var(--text-dark);
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .links {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .link-button {
+      text-decoration: none;
+      padding: 12px;
+      border-radius: 10px;
+      background-color: var(--button-bg);
+      color: #fff;
+      text-align: center;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .link-button:hover {
+      background-color: var(--button-hover);
+    }
+
+    .toggle-btn {
+      margin-top: 30px;
+      padding: 10px 20px;
+      background: none;
+      border: 2px solid var(--primary);
+      color: inherit;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-btn:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>My Work Contacts</h1>
+    <div class="links">
+      <a class="link-button" href="https://www.facebook.com/share/191hkTtuet/" target="_blank">Facebook</a>
+      <a class="link-button" href="https://t.me/@ny_kimhenggg" target="_blank">Telegram</a>
+      <a class="link-button" href="https://www.tiktok.com/@johan_9112" target="_blank">TikTok</a>
+      <a class="link-button" href="https://instagram.com/heng_zip_zip" target="_blank">Instagram</a>
+      <a class="link-button" href="https://github.com/kimhenggg123" target="_blank">GitHub</a>
+    </div>
+    <button class="toggle-btn" onclick="toggleTheme()">Toggle Dark/Light Mode</button>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+    }
+  </script>
+</body>
+</html>
