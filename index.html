@@ -2,102 +2,643 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Work Contacts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enhanced Teacher's Listening Test Tool</title>
   <style>
-    :root {
-      --primary: #0d1b2a;
-      --background-light: #ffffff;
-      --background-dark: #000000;
-      --text-light: #000000;
-      --text-dark: #ffffff;
-      --button-bg: #1b263b;
-      --button-hover: #415a77;
-    }
-
     body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: var(--background-light);
-      color: var(--text-light);
-      transition: all 0.3s ease;
-    }
-
-    .dark-mode {
-      background-color: var(--background-dark);
-      color: var(--text-dark);
-    }
-
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
       padding: 20px;
+      min-height: 100vh;
     }
-
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
     h1 {
+      text-align: center;
+      color: #2563eb;
+      margin-bottom: 30px;
+      font-size: 2.2em;
+    }
+    .voice-quality-info {
+      background: #e0f2fe;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border-left: 4px solid #0288d1;
+    }
+    .voice-quality-info h3 {
+      margin-top: 0;
+      color: #0277bd;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: inherit;
+      resize: vertical;
+    }
+    textarea:focus {
+      border-color: #2563eb;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .controls, .options {
+      margin: 20px 0;
+    }
+    .control-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
       margin-bottom: 20px;
     }
-
-    .links {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
+    @media (max-width: 600px) {
+      .control-group {
+        grid-template-columns: 1fr;
+      }
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #374151;
+    }
+    select, input[type=number], input[type=range] {
       width: 100%;
-      max-width: 300px;
-    }
-
-    .link-button {
-      text-decoration: none;
       padding: 12px;
-      border-radius: 10px;
-      background-color: var(--button-bg);
-      color: #fff;
-      text-align: center;
-      font-weight: bold;
-      transition: background-color 0.3s ease;
+      margin-bottom: 15px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
     }
-
-    .link-button:hover {
-      background-color: var(--button-hover);
+    select:focus, input:focus {
+      border-color: #2563eb;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
-
-    .toggle-btn {
-      margin-top: 30px;
-      padding: 10px 20px;
-      background: none;
-      border: 2px solid var(--primary);
-      color: inherit;
+    .voice-info {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: -10px;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 12px 24px;
+      margin: 5px 5px 5px 0;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
     }
-
-    .toggle-btn:hover {
-      background-color: var(--primary);
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .status {
+      margin-top: 25px;
+      font-weight: bold;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f3f4f6;
+      border-left: 4px solid #10b981;
+    }
+    .extra-buttons {
+      margin-top: 15px;
+    }
+    .checkbox {
+      margin-top: 15px;
+    }
+    .checkbox label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .checkbox input[type="checkbox"] {
+      width: auto;
+      margin-right: 10px;
+      margin-bottom: 0;
+    }
+    .audio-settings {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    .audio-settings h3 {
+      margin-top: 0;
+      color: #374151;
+    }
+    .range-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .range-value {
+      background: #2563eb;
       color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      min-width: 40px;
+      text-align: center;
+    }
+    .word-preview {
+      background: #fff7ed;
+      border: 2px solid #fed7aa;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>My Work Contacts</h1>
-    <div class="links">
-      <a class="link-button" href="https://www.facebook.com/share/191hkTtuet/" target="_blank">Facebook</a>
-      <a class="link-button" href="https://t.me/@ny_kimhenggg" target="_blank">Telegram</a>
-      <a class="link-button" href="https://www.tiktok.com/@johan_9112" target="_blank">TikTok</a>
-      <a class="link-button" href="https://instagram.com/heng_zip_zip" target="_blank">Instagram</a>
-      <a class="link-button" href="https://github.com/kimhenggg123" target="_blank">GitHub</a>
+    <h1>🎧 Enhanced Listening Test Tool</h1>
+    
+    <div class="voice-quality-info">
+      <h3>🔊 Voice Quality Tips</h3>
+      <p><strong>Current voice quality:</strong> <span id="voiceQuality">Checking...</span></p>
+      <p>• Select high-quality voices (marked with ⭐)<br>
+      • Premium voices provide clearer pronunciation<br>
+      • Adjust speed between 0.7-0.9x for better clarity</p>
     </div>
-    <button class="toggle-btn" onclick="toggleTheme()">Toggle Dark/Light Mode</button>
+
+    <div class="control-group">
+      <div>
+        <label for="contentType">Content Type:</label>
+        <select id="contentType" onchange="switchContentType()">
+          <option value="words">Individual Words</option>
+          <option value="paragraphs">Paragraphs/Sentences</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="words" id="contentLabel">Enter Words (one per line):</label>
+    <textarea id="words" placeholder="apple
+banana
+carrot
+dictionary
+elephant"></textarea>
+    <div class="word-preview" id="wordPreview">Words will appear here as you type...</div>
+
+    <div class="audio-settings">
+      <h3>🎛️ Audio Settings</h3>
+      
+      <div class="control-group">
+        <div>
+          <label for="voiceSelect">Voice Selection:</label>
+          <select id="voiceSelect"></select>
+          <div class="voice-info" id="voiceInfo">Loading voices...</div>
+        </div>
+        
+        <div>
+          <label for="repeatCount">Repetitions per word:</label>
+          <input type="number" id="repeatCount" min="1" max="5" value="2">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div>
+          <label for="speedRange">Speaking Speed:</label>
+          <div class="range-container">
+            <input type="range" id="speedRange" min="0.5" max="1.5" step="0.1" value="0.8">
+            <span class="range-value" id="speedDisplay">0.8x</span>
+          </div>
+        </div>
+        
+        <div>
+          <label for="pauseBetween">Pause between words (seconds):</label>
+          <div class="range-container">
+            <input type="range" id="pauseBetween" min="0.5" max="5" step="0.5" value="2">
+            <span class="range-value" id="pauseDisplay">2s</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div>
+          <label for="pitchRange">Voice Pitch:</label>
+          <div class="range-container">
+            <input type="range" id="pitchRange" min="0.5" max="2" step="0.1" value="1">
+            <span class="range-value" id="pitchDisplay">1.0</span>
+          </div>
+        </div>
+        
+        <div>
+          <label for="volumeRange">Volume:</label>
+          <div class="range-container">
+            <input type="range" id="volumeRange" min="0.3" max="1" step="0.1" value="0.9">
+            <span class="range-value" id="volumeDisplay">0.9</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkbox">
+        <label><input type="checkbox" id="randomOrder"> 🔀 Random selection</label>
+      </div>
+      
+      <div class="checkbox">
+        <label><input type="checkbox" id="clearSpeaking" checked> 🎯 Enhanced clarity mode</label>
+      </div>
+    </div>
+
+    <button onclick="testVoice()">🔊 Test Current Voice</button>
+    <button onclick="startTest()">▶️ Start Test</button>
+    <button onclick="stopTest()" id="stopBtn" disabled>⏹️ Stop Test</button>
+
+    <div class="extra-buttons">
+      <button onclick="repeatWord()" id="repeatBtn" disabled>🔁 Repeat Current Word</button>
+      <button onclick="prevWord()" id="prevBtn" disabled>⬅️ Previous Word</button>
+      <button onclick="nextWord()" id="nextBtn" disabled>➡️ Next Word</button>
+    </div>
+
+    <div class="status" id="status">Ready to start your listening test</div>
   </div>
 
   <script>
-    function toggleTheme() {
-      document.body.classList.toggle('dark-mode');
+    let voices = [];
+    let words = [];
+    let paragraphs = [];
+    let currentContentType = 'words';
+    let history = [];
+    let currentWord = '';
+    let currentIndex = 0;
+    let isRunning = false;
+    let timeoutId = null;
+    let qualityVoices = [];
+
+    // DOM elements
+    const elements = {
+      voiceSelect: document.getElementById('voiceSelect'),
+      speedRange: document.getElementById('speedRange'),
+      speedDisplay: document.getElementById('speedDisplay'),
+      pauseBetween: document.getElementById('pauseBetween'),
+      pauseDisplay: document.getElementById('pauseDisplay'),
+      pitchRange: document.getElementById('pitchRange'),
+      pitchDisplay: document.getElementById('pitchDisplay'),
+      volumeRange: document.getElementById('volumeRange'),
+      volumeDisplay: document.getElementById('volumeDisplay'),
+      status: document.getElementById('status'),
+      wordsInput: document.getElementById('words'),
+      wordPreview: document.getElementById('wordPreview'),
+      voiceQuality: document.getElementById('voiceQuality'),
+      voiceInfo: document.getElementById('voiceInfo')
+    };
+
+    // Update displays
+    elements.speedRange.addEventListener('input', () => {
+      elements.speedDisplay.textContent = elements.speedRange.value + 'x';
+    });
+
+    elements.pauseBetween.addEventListener('input', () => {
+      elements.pauseDisplay.textContent = elements.pauseBetween.value + 's';
+    });
+
+    elements.pitchRange.addEventListener('input', () => {
+      elements.pitchDisplay.textContent = elements.pitchRange.value;
+    });
+
+    elements.volumeRange.addEventListener('input', () => {
+      elements.volumeDisplay.textContent = elements.volumeRange.value;
+    });
+
+    elements.wordsInput.addEventListener('input', updateWordPreview);
+
+    function switchContentType() {
+      currentContentType = document.getElementById('contentType').value;
+      const label = document.getElementById('contentLabel');
+      const textarea = elements.wordsInput;
+      const repeatCountInput = document.getElementById('repeatCount');
+      const repeatLabel = repeatCountInput.previousElementSibling;
+      
+      if (currentContentType === 'paragraphs') {
+        label.textContent = 'Enter Paragraphs/Sentences (one per line):';
+        textarea.placeholder = `The quick brown fox jumps over the lazy dog.
+This is a sample sentence for listening practice.
+Students should listen carefully to each word.
+Practice makes perfect in language learning.`;
+        repeatLabel.textContent = 'Repetitions per paragraph:';
+        textarea.style.height = '150px';
+      } else {
+        label.textContent = 'Enter Words (one per line):';
+        textarea.placeholder = `apple
+banana
+carrot
+dictionary
+elephant`;
+        repeatLabel.textContent = 'Repetitions per word:';
+        textarea.style.height = '120px';
+      }
+      updateWordPreview();
     }
+
+    function updateWordPreview() {
+      const input = elements.wordsInput.value.trim();
+      if (!input) {
+        const type = currentContentType === 'paragraphs' ? 'paragraphs' : 'words';
+        elements.wordPreview.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} will appear here as you type...`;
+        return;
+      }
+      
+      const contentList = input.split(/\n+/).map(w => w.trim()).filter(Boolean);
+      const type = currentContentType === 'paragraphs' ? 'paragraphs' : 'words';
+      const preview = currentContentType === 'paragraphs' 
+        ? contentList.slice(0, 3).map(p => p.length > 50 ? p.substring(0, 50) + '...' : p).join(' | ')
+        : contentList.slice(0, 10).join(', ');
+      
+      elements.wordPreview.innerHTML = `<strong>${contentList.length} ${type}:</strong> ${preview}${contentList.length > (currentContentType === 'paragraphs' ? 3 : 10) ? '...' : ''}`;
+    }
+
+    function identifyQualityVoices(voiceList) {
+      qualityVoices = voiceList.filter(voice => {
+        const name = voice.name.toLowerCase();
+        const lang = voice.lang.toLowerCase();
+        
+        // High-quality voice indicators
+        const premiumIndicators = [
+          'premium', 'enhanced', 'neural', 'natural', 'high-quality',
+          'aria', 'jenny', 'guy', 'davis', 'jane', 'jason', 'sara',
+          'zira', 'mark', 'david', 'catherine', 'joanna', 'kendra',
+          'kimberly', 'salli', 'joey', 'justin', 'matthew', 'ivy'
+        ];
+        
+        const isPremium = premiumIndicators.some(indicator => name.includes(indicator));
+        const isEnglish = lang.startsWith('en');
+        const isLocal = voice.localService;
+        
+        return isPremium || (isEnglish && isLocal);
+      });
+      
+      return qualityVoices;
+    }
+
+    function populateVoices() {
+      voices = speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        setTimeout(populateVoices, 100);
+        return;
+      }
+
+      const highQuality = identifyQualityVoices(voices);
+      elements.voiceSelect.innerHTML = '';
+      
+      // Sort voices: premium first, then by language
+      const sortedVoices = [...voices].sort((a, b) => {
+        const aIsPremium = qualityVoices.includes(a);
+        const bIsPremium = qualityVoices.includes(b);
+        if (aIsPremium && !bIsPremium) return -1;
+        if (!aIsPremium && bIsPremium) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      sortedVoices.forEach((voice, i) => {
+        const opt = document.createElement('option');
+        opt.value = voices.indexOf(voice);
+        const isPremium = qualityVoices.includes(voice);
+        const prefix = isPremium ? '⭐ ' : '';
+        const suffix = voice.localService ? ' (Local)' : ' (Network)';
+        opt.textContent = `${prefix}${voice.name} (${voice.lang})${suffix}`;
+        elements.voiceSelect.appendChild(opt);
+      });
+
+      // Select first premium voice if available
+      const firstPremiumIndex = voices.findIndex(v => qualityVoices.includes(v));
+      if (firstPremiumIndex !== -1) {
+        elements.voiceSelect.value = firstPremiumIndex;
+      }
+
+      updateVoiceInfo();
+      elements.voiceSelect.addEventListener('change', updateVoiceInfo);
+    }
+
+    function updateVoiceInfo() {
+      const selectedVoice = voices[elements.voiceSelect.value];
+      if (!selectedVoice) return;
+
+      const isPremium = qualityVoices.includes(selectedVoice);
+      const quality = isPremium ? 'High Quality ⭐' : 'Standard Quality';
+      const type = selectedVoice.localService ? 'Local (Fast)' : 'Network (May vary)';
+      
+      elements.voiceQuality.textContent = quality;
+      elements.voiceInfo.textContent = `${type} • ${selectedVoice.lang}`;
+    }
+
+    speechSynthesis.onvoiceschanged = populateVoices;
+    populateVoices();
+
+    function speak(text, settings, callback) {
+      // Cancel any ongoing speech
+      speechSynthesis.cancel();
+      
+      // Small delay to ensure cancellation is processed
+      setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Apply settings
+        if (settings.voice) utterance.voice = settings.voice;
+        utterance.rate = settings.rate || 0.8;
+        utterance.pitch = settings.pitch || 1.0;
+        utterance.volume = settings.volume || 0.9;
+        
+        // Enhanced clarity for certain words
+        if (document.getElementById('clearSpeaking').checked) {
+          // Add slight pauses for complex words
+          if (text.length > 6) {
+            utterance.rate *= 0.9; // Slightly slower for longer words
+          }
+        }
+        
+        if (callback) {
+          utterance.onend = callback;
+          utterance.onerror = callback;
+        }
+        
+        speechSynthesis.speak(utterance);
+      }, 50);
+    }
+
+    function getCurrentSettings() {
+      return {
+        voice: voices[elements.voiceSelect.value] || null,
+        rate: parseFloat(elements.speedRange.value),
+        pitch: parseFloat(elements.pitchRange.value),
+        volume: parseFloat(elements.volumeRange.value)
+      };
+    }
+
+    function testVoice() {
+      const settings = getCurrentSettings();
+      const input = elements.wordsInput.value.trim();
+      let testContent;
+      
+      if (currentContentType === 'paragraphs') {
+        testContent = input.split('\n')[0] || 'This is a test paragraph for checking voice quality and clarity.';
+      } else {
+        testContent = input.split('\n')[0] || 'Hello, this is a test';
+      }
+      
+      elements.status.textContent = `🔊 Testing voice with: "${testContent.substring(0, 50)}${testContent.length > 50 ? '...' : ''}"`;
+      
+      speak(testContent, settings, () => {
+        elements.status.textContent = 'Voice test completed';
+      });
+    }
+
+    function startTest() {
+      const input = elements.wordsInput.value.trim();
+      if (!input) {
+        const type = currentContentType === 'paragraphs' ? 'paragraphs' : 'words';
+        return alert(`Please enter some ${type} to practice with`);
+      }
+      
+      const contentList = input.split(/\n+/).map(w => w.trim()).filter(Boolean);
+      if (contentList.length === 0) return alert("No valid content found. Please check your input.");
+
+      if (currentContentType === 'paragraphs') {
+        paragraphs = contentList;
+        words = paragraphs; // Use same array for consistency
+      } else {
+        words = contentList;
+        paragraphs = [];
+      }
+
+      history = [];
+      currentIndex = 0;
+      isRunning = true;
+      
+      // Enable/disable buttons
+      document.getElementById('stopBtn').disabled = false;
+      document.getElementById('repeatBtn').disabled = false;
+      document.getElementById('prevBtn').disabled = false;
+      document.getElementById('nextBtn').disabled = false;
+      
+      elements.status.textContent = "🎯 Test starting...";
+
+      const repeat = parseInt(document.getElementById('repeatCount').value);
+      const pause = parseFloat(elements.pauseBetween.value) * 1000;
+      const isRandom = document.getElementById('randomOrder').checked;
+      const settings = getCurrentSettings();
+
+      function readNext() {
+        if (!isRunning) return;
+
+        if (isRandom) {
+          currentWord = words[Math.floor(Math.random() * words.length)];
+        } else {
+          currentWord = words[currentIndex % words.length];
+          currentIndex++;
+        }
+
+        history.push(currentWord);
+        const contentType = currentContentType === 'paragraphs' ? 'paragraph' : 'word';
+        const displayText = currentWord.length > 50 ? currentWord.substring(0, 50) + '...' : currentWord;
+        elements.status.textContent = `🔊 Speaking ${contentType}: "${displayText}" (${history.length}/${isRandom ? '∞' : words.length})`;
+
+        let count = 0;
+        function repeatSpeak() {
+          if (!isRunning) return;
+          if (count >= repeat) {
+            timeoutId = setTimeout(readNext, pause);
+            return;
+          }
+          
+          speak(currentWord, settings, () => {
+            count++;
+            if (count < repeat) {
+              // Short pause between repetitions (longer for paragraphs)
+              const betweenPause = currentContentType === 'paragraphs' ? 800 : 300;
+              setTimeout(repeatSpeak, betweenPause);
+            } else {
+              repeatSpeak();
+            }
+          });
+        }
+        repeatSpeak();
+      }
+
+      readNext();
+    }
+
+    function stopTest() {
+      isRunning = false;
+      clearTimeout(timeoutId);
+      speechSynthesis.cancel();
+      elements.status.textContent = "⏹️ Test stopped";
+      
+      // Disable control buttons
+      document.getElementById('stopBtn').disabled = true;
+      document.getElementById('repeatBtn').disabled = true;
+      document.getElementById('prevBtn').disabled = true;
+      document.getElementById('nextBtn').disabled = true;
+    }
+
+    function repeatWord() {
+      if (!currentWord) return;
+      speechSynthesis.cancel();
+      const settings = getCurrentSettings();
+      const contentType = currentContentType === 'paragraphs' ? 'paragraph' : 'word';
+      const displayText = currentWord.length > 50 ? currentWord.substring(0, 50) + '...' : currentWord;
+      elements.status.textContent = `🔁 Repeating ${contentType}: "${displayText}"`;
+      speak(currentWord, settings, null);
+    }
+
+    function prevWord() {
+      if (history.length < 2) return;
+      speechSynthesis.cancel();
+      const settings = getCurrentSettings();
+      currentWord = history[history.length - 2];
+      const contentType = currentContentType === 'paragraphs' ? 'paragraph' : 'word';
+      const displayText = currentWord.length > 50 ? currentWord.substring(0, 50) + '...' : currentWord;
+      elements.status.textContent = `⬅️ Previous ${contentType}: "${displayText}"`;
+      speak(currentWord, settings, null);
+    }
+
+    function nextWord() {
+      if (!isRunning) return;
+      speechSynthesis.cancel();
+      clearTimeout(timeoutId);
+      
+      const isRandom = document.getElementById('randomOrder').checked;
+      if (isRandom) {
+        currentWord = words[Math.floor(Math.random() * words.length)];
+      } else {
+        currentWord = words[currentIndex % words.length];
+        currentIndex++;
+      }
+      
+      history.push(currentWord);
+      const settings = getCurrentSettings();
+      const contentType = currentContentType === 'paragraphs' ? 'paragraph' : 'word';
+      const displayText = currentWord.length > 50 ? currentWord.substring(0, 50) + '...' : currentWord;
+      elements.status.textContent = `➡️ Next ${contentType}: "${displayText}"`;
+      speak(currentWord, settings, null);
+    }
+
+    // Initialize
+    updateWordPreview();
   </script>
 </body>
 </html>
