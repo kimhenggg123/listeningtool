@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teacher's Listening Test Tool</title>
+  <title>Enhanced Teacher's Listening Test Tool</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -266,7 +266,9 @@ elephant"></textarea>
     </div>
 
     <button onclick="testVoice()">🔊 Test Current Voice</button>
-    <button onclick="startTest()">▶️ Start Test</button>
+    <button onclick="startTest()" id="startBtn">▶️ Start Test</button>
+    <button onclick="pauseTest()" id="pauseBtn" disabled>⏸️ Pause</button>
+    <button onclick="resumeTest()" id="resumeBtn" disabled>▶️ Resume</button>
     <button onclick="stopTest()" id="stopBtn" disabled>⏹️ Stop Test</button>
 
     <div class="extra-buttons">
@@ -286,9 +288,13 @@ elephant"></textarea>
     let history = [];
     let currentWord = '';
     let currentIndex = 0;
+    let currentRepetition = 0;
+    let totalRepetitions = 2;
     let isRunning = false;
+    let isPaused = false;
     let timeoutId = null;
     let qualityVoices = [];
+    let pausedState = null;
 
     // DOM elements
     const elements = {
@@ -471,11 +477,17 @@ elephant`;
           }
         }
         
-        if (callback) {
-          utterance.onend = callback;
-          utterance.onerror = callback;
-        }
+        // Handle pause interruption
+        utterance.onend = () => {
+          if (!isPaused && callback) callback();
+        };
         
+        utterance.onerror = () => {
+          if (!isPaused && callback) callback();
+        };
+        
+        // Store current utterance reference for pause/resume
+        window.currentUtterance = utterance;
         speechSynthesis.speak(utterance);
       }, 50);
     }
@@ -525,11 +537,19 @@ elephant`;
         paragraphs = [];
       }
 
+      // Initialize test state
       history = [];
       currentIndex = 0;
+      currentRepetition = 0;
       isRunning = true;
+      isPaused = false;
+      pausedState = null;
+      totalRepetitions = parseInt(document.getElementById('repeatCount').value);
       
-      // Enable/disable buttons
+      // Update button states
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('pauseBtn').disabled = false;
+      document.getElementById('resumeBtn').disabled = true;
       document.getElementById('stopBtn').disabled = false;
       document.getElementById('repeatBtn').disabled = false;
       document.getElementById('prevBtn').disabled = false;
@@ -537,58 +557,155 @@ elephant`;
       
       elements.status.textContent = "🎯 Test starting...";
 
-      const repeat = parseInt(document.getElementById('repeatCount').value);
+      startReading();
+    }
+
+    function startReading() {
       const pause = parseFloat(elements.pauseBetween.value) * 1000;
       const isRandom = document.getElementById('randomOrder').checked;
       const settings = getCurrentSettings();
 
       function readNext() {
-        if (!isRunning) return;
+        if (!isRunning || isPaused) return;
 
+        // Select next word/paragraph
         if (isRandom) {
           currentWord = words[Math.floor(Math.random() * words.length)];
         } else {
           currentWord = words[currentIndex % words.length];
-          currentIndex++;
         }
 
         history.push(currentWord);
+        currentRepetition = 0;
+        
         const contentType = currentContentType === 'paragraphs' ? 'paragraph' : 'word';
         const displayText = currentWord.length > 50 ? currentWord.substring(0, 50) + '...' : currentWord;
         elements.status.textContent = `🔊 Speaking ${contentType}: "${displayText}" (${history.length}/${isRandom ? '∞' : words.length})`;
 
-        let count = 0;
-        function repeatSpeak() {
-          if (!isRunning) return;
-          if (count >= repeat) {
-            timeoutId = setTimeout(readNext, pause);
-            return;
-          }
-          
-          speak(currentWord, settings, () => {
-            count++;
-            if (count < repeat) {
-              // Short pause between repetitions (longer for paragraphs)
-              const betweenPause = currentContentType === 'paragraphs' ? 800 : 300;
-              setTimeout(repeatSpeak, betweenPause);
-            } else {
-              repeatSpeak();
-            }
-          });
+        repeatCurrentWord(settings, pause, readNext);
+      }
+
+      function repeatCurrentWord(settings, pause, nextCallback) {
+        if (!isRunning || isPaused) return;
+        
+        if (currentRepetition >= totalRepetitions) {
+          currentIndex++;
+          currentRepetition = 0;
+          timeoutId = setTimeout(nextCallback, pause);
+          return;
         }
-        repeatSpeak();
+
+        speak(currentWord, settings, () => {
+          if (!isRunning || isPaused) return;
+          currentRepetition++;
+          if (currentRepetition < totalRepetitions) {
+            // Short pause between repetitions
+            const betweenPause = currentContentType === 'paragraphs' ? 800 : 300;
+            timeoutId = setTimeout(() => repeatCurrentWord(settings, pause, nextCallback), betweenPause);
+          } else {
+            repeatCurrentWord(settings, pause, nextCallback);
+          }
+        });
       }
 
       readNext();
     }
 
+    function pauseTest() {
+      if (!isRunning) return;
+      
+      isPaused = true;
+      speechSynthesis.pause();
+      clearTimeout(timeoutId);
+      
+      // Save current state
+      pausedState = {
+        currentWord: currentWord,
+        currentIndex: currentIndex,
+        currentRepetition: currentRepetition,
+        history: [...history]
+      };
+      
+      // Update button states
+      document.getElementById('pauseBtn').disabled = true;
+      document.getElementById('resumeBtn').disabled = false;
+      
+      elements.status.textContent = "⏸️ Test paused - click Resume to continue";
+    }
+
+    function resumeTest() {
+      if (!isRunning || !isPaused) return;
+      
+      isPaused = false;
+      
+      // Update button states
+      document.getElementById('pauseBtn').disabled = false;
+      document.getElementById('resumeBtn').disabled = true;
+      
+      // Check if speech synthesis was paused mid-speech
+      if (speechSynthesis.paused) {
+        speechSynthesis.resume();
+        elements.status.textContent = "▶️ Resuming speech...";
+      } else {
+        // Continue from where we left off
+        elements.status.textContent = "▶️ Resuming test...";
+        continueFromPause();
+      }
+    }
+
+    function continueFromPause() {
+      if (!pausedState) {
+        startReading();
+        return;
+      }
+
+      const pause = parseFloat(elements.pauseBetween.value) * 1000;
+      const settings = getCurrentSettings();
+
+      function repeatCurrentWord() {
+        if (!isRunning || isPaused) return;
+        
+        if (currentRepetition >= totalRepetitions) {
+          currentIndex++;
+          currentRepetition = 0;
+          timeoutId = setTimeout(() => {
+            if (!isPaused) startReading();
+          }, pause);
+          return;
+        }
+
+        const contentType = currentContentType === 'paragraphs' ? 'paragraph' : 'word';
+        const displayText = currentWord.length > 50 ? currentWord.substring(0, 50) + '...' : currentWord;
+        elements.status.textContent = `🔊 Speaking ${contentType}: "${displayText}" (Rep ${currentRepetition + 1}/${totalRepetitions})`;
+
+        speak(currentWord, settings, () => {
+          if (!isRunning || isPaused) return;
+          currentRepetition++;
+          if (currentRepetition < totalRepetitions) {
+            const betweenPause = currentContentType === 'paragraphs' ? 800 : 300;
+            timeoutId = setTimeout(repeatCurrentWord, betweenPause);
+          } else {
+            repeatCurrentWord();
+          }
+        });
+      }
+
+      repeatCurrentWord();
+    }
+
     function stopTest() {
       isRunning = false;
+      isPaused = false;
       clearTimeout(timeoutId);
       speechSynthesis.cancel();
-      elements.status.textContent = "⏹️ Test stopped";
+      pausedState = null;
       
-      // Disable control buttons
+      elements.status.textContent = "⏹️ Test stopped - ready to start new test";
+      
+      // Reset button states
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('pauseBtn').disabled = true;
+      document.getElementById('resumeBtn').disabled = true;
       document.getElementById('stopBtn').disabled = true;
       document.getElementById('repeatBtn').disabled = true;
       document.getElementById('prevBtn').disabled = true;
@@ -598,16 +715,25 @@ elephant`;
     function repeatWord() {
       if (!currentWord) return;
       speechSynthesis.cancel();
+      clearTimeout(timeoutId);
+      
       const settings = getCurrentSettings();
       const contentType = currentContentType === 'paragraphs' ? 'paragraph' : 'word';
       const displayText = currentWord.length > 50 ? currentWord.substring(0, 50) + '...' : currentWord;
       elements.status.textContent = `🔁 Repeating ${contentType}: "${displayText}"`;
-      speak(currentWord, settings, null);
+      speak(currentWord, settings, () => {
+        if (isRunning && !isPaused) {
+          // Resume normal flow after manual repeat
+          setTimeout(() => continueFromPause(), 500);
+        }
+      });
     }
 
     function prevWord() {
       if (history.length < 2) return;
       speechSynthesis.cancel();
+      clearTimeout(timeoutId);
+      
       const settings = getCurrentSettings();
       currentWord = history[history.length - 2];
       const contentType = currentContentType === 'paragraphs' ? 'paragraph' : 'word';
@@ -630,11 +756,19 @@ elephant`;
       }
       
       history.push(currentWord);
+      currentRepetition = 0; // Reset repetition counter
+      
       const settings = getCurrentSettings();
       const contentType = currentContentType === 'paragraphs' ? 'paragraph' : 'word';
       const displayText = currentWord.length > 50 ? currentWord.substring(0, 50) + '...' : currentWord;
       elements.status.textContent = `➡️ Next ${contentType}: "${displayText}"`;
-      speak(currentWord, settings, null);
+      speak(currentWord, settings, () => {
+        if (isRunning && !isPaused) {
+          // Continue with repetitions for this word
+          currentRepetition = 1;
+          setTimeout(() => continueFromPause(), 300);
+        }
+      });
     }
 
     // Initialize
